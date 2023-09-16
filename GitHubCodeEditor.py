@@ -1,10 +1,4 @@
-import http.server
-import socketserver
-import tkinter as tk
-import npp
-import bard
-import git
-import pygithub
+import lamda
 
 class RepositoryManager:
     def __init__(self):
@@ -22,16 +16,16 @@ class RepositoryManager:
             if repository.name == repository_name:
                 return repository
 
-class GitHubCodeEditor(tk.Tk):
+class GitHubCodeEditor(tkinter.Tk):
     def __init__(self):
         super().__init__()
 
         self.repository_manager = RepositoryManager()
-        self.bard_client = bard.Client()
+        self.lamda_client = lamda.Client()
         self.generated_code = []
 
         # Create a chat window and a Notepad++ widget.
-        self.chat_window = tk.Text(self)
+        self.chat_window = tkinter.Text(self)
         self.chat_window.pack()
         self.npp_widget = npp.Widget(self)
         self.npp_widget.pack()
@@ -55,7 +49,7 @@ class GitHubCodeEditor(tk.Tk):
         self.repository_menu.add_command(label='Deploy Code')
 
         # Create a status bar.
-        self.status_bar = tk.Label(self, text='Status: Idle')
+        self.status_bar = tkinter.Label(self, text='Status: Idle')
         self.status_bar.pack(side=tkinter.BOTTOM)
 
         # Bind the repository manager to the repository changed event.
@@ -64,21 +58,28 @@ class GitHubCodeEditor(tk.Tk):
         # Update the status bar initially.
         self.update_status_bar()
 
-        # Create a PyGithub object.
-        self.pygithub = pygithub.GitHub()
-
     def send_message(self):
         # Get the user's request.
         request = self.chat_window.get('1.0', 'end')
 
         # If the request is to generate code, generate the code and insert it into Notepad++.
         if request.startswith('generate code'):
-            code = self.bard_client.generate_code(request[12:])
+            code = self.lamda_client.generate_code(
+                request[12:],
+                programming_language="python"
+            )
             self.npp_widget.insert_text(code)
             self.generated_code.append(code)
 
         # If the request is to suggest code, suggest code to the user.
         elif request.startswith('suggest code'):
-            code = self.chat_window.get('1.0', 'end')
-            suggestions = self.bard_client.suggest_code(code)
-            self.chat_window.insert_text(f'Bard\'s suggestions:\n{suggestions}')
+            code = self.npp_widget.get_text()
+            suggestions = self.lamda_client.suggest_code(
+                code,
+                programming_language="python"
+            )
+            self.chat_window.insert_text(f'LaMDA\'s suggestions:\n{suggestions}')
+
+if __name__ == '__main__':
+    github_code_editor = GitHubCodeEditor()
+    github_code_editor.mainloop()
