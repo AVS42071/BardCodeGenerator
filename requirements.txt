@@ -1,0 +1,6 @@
+bard
+flask
+git
+npp
+pygithub
+tkinter
